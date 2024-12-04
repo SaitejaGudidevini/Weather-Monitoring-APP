@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Monitor</h1>
+        <div class="weather-form">
+            <input type="text" id="location" placeholder="Enter location (city, country)">
+            <button onclick="getWeather()">Get Weather</button>
+        </div>
+        <div id="weather-result" class="weather-result hidden">
+            <h2 id="location-name"></h2>
+            <p id="temperature"></p>
+            <p id="description"></p>
+        </div>
+        <div id="error-message" class="error hidden"></div>
+    </div>
+
+    <script>
+        function getWeather() {
+            const location = document.getElementById('location').value;
+            const resultDiv = document.getElementById('weather-result');
+            const errorDiv = document.getElementById('error-message');
+            
+            fetch('/get_weather', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `location=${encodeURIComponent(location)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    errorDiv.classList.remove('hidden');
+                    resultDiv.classList.add('hidden');
+                } else {
+                    document.getElementById('location-name').textContent = data.location;
+                    document.getElementById('temperature').textContent = `Temperature: ${data.temperature}°F`;
+                    document.getElementById('description').textContent = `Description: ${data.description}`;
+                    resultDiv.classList.remove('hidden');
+                    errorDiv.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = 'Error fetching weather data';
+                errorDiv.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
